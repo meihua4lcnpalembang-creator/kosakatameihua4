@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="id" translate="no" class="notranslate">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif Mandarin Mei Hua 4 (Unit 1 - 4)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Mematikan Fitur Select Teks dan Copy */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#bbf7d0 2px, transparent 2px);
+            background-size: 24px 24px;
+        }
+        
+        /* Font SimSun Khusus Karakter Hanzi */
+        .font-simsun {
+            font-family: 'SimSun', 'Songti SC', 'STSong', serif;
+        }
+
+        .font-bubble {
+            font-family: 'Fredoka One', cursive;
+        }
+
+        .btn-bounce:hover {
+            transform: translateY(-2px) scale(1.01);
+        }
+        
+        .btn-bounce:active {
+            transform: translateY(1px) scale(0.99);
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-pop {
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .aspect-16-9 {
+            aspect-ratio: 16 / 9;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { background-color: rgba(239, 68, 68, 0.1); }
+            50% { background-color: rgba(239, 68, 68, 0.3); }
+        }
+
+        .timer-warning {
+            animation: pulse-red 0.5s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2 md:p-6" oncontextmenu="return false;" onselectstart="return false;" ondragstart="return false;">
+
+    <!-- Container Utama 16:9 -->
+    <div id="main-container" class="w-full max-w-5xl aspect-16-9 bg-white rounded-3xl shadow-2xl border-4 border-emerald-400 overflow-hidden flex flex-col justify-between relative transition-all duration-300">
+        
+        <!-- Header Kuis -->
+        <div class="bg-gradient-to-r from-emerald-500 via-teal-500 to-green-500 px-6 py-2.5 text-white text-center relative shrink-0">
+            <div class="absolute top-2 left-6 text-2xl animate-bounce">🌸</div>
+            <div class="absolute top-2 right-6 text-2xl animate-bounce" style="animation-delay: 0.2s;">✨</div>
+            <h1 class="text-xl md:text-3xl font-bubble tracking-wide drop-shadow-md">
+                🌸 Kuis Mei Hua 4 (Unit 1 - 4) 🌸
+            </h1>
+            <p id="mode-subtitle" class="text-teal-50 text-xs md:text-sm font-medium">
+                Sesi Utama • Latihan Kosakata Mandarin SD Kelas 4
+            </p>
+        </div>
+
+        <!-- Dashboard Informasi Skor & Progress -->
+        <div id="quiz-header" class="bg-amber-100 px-6 py-1.5 border-b-2 border-amber-200 flex justify-between items-center text-gray-700 font-bold text-xs md:text-sm shrink-0">
+            <div class="flex items-center space-x-2">
+                <span class="bg-white px-3 py-1 rounded-full shadow-sm border border-amber-300">
+                    <i class="fa-solid text-amber-500 fa-star"></i> Skor: <span id="score-display" class="text-emerald-600 font-extrabold text-base">0</span>
+                </span>
+            </div>
+
+            <!-- Timer Display -->
+            <div class="flex items-center space-x-2">
+                <div id="timer-badge" class="bg-white px-3 py-1 rounded-full shadow-sm border border-red-300 flex items-center space-x-1.5 text-red-600">
+                    <i class="fa-solid fa-stopwatch animate-spin" style="animation-duration: 3s;"></i>
+                    <span>Waktu:</span>
+                    <span id="timer-text" class="font-extrabold text-base w-6 text-center">10</span>s
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <span id="wrong-count-badge" class="bg-red-50 text-red-600 px-3 py-1 rounded-full shadow-sm border border-red-200 hidden">
+                    <i class="fa-solid fa-rotate-left mr-1"></i>Perlu Diulang: <span id="wrong-count" class="font-extrabold">0</span>
+                </span>
+                <span class="bg-white px-3 py-1 rounded-full shadow-sm border border-amber-300">
+                    <i class="fa-solid text-teal-500 fa-list-check"></i> Soal: <span id="question-number" class="text-teal-600 font-extrabold">1</span>/<span id="total-questions">0</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Progress Bar Waktu (Timer Bar) -->
+        <div class="w-full bg-gray-200 h-1.5 shrink-0 relative">
+            <div id="timer-bar" class="bg-emerald-500 h-1.5 transition-all duration-1000 ease-linear rounded-r-full" style="width: 100%;"></div>
+        </div>
+
+        <!-- Area Konten Utama Kuis -->
+        <div class="p-4 md:p-6 flex-grow flex flex-col justify-center overflow-hidden">
+            
+            <!-- Layar Soal -->
+            <div id="question-container" class="animate-pop h-full flex flex-col justify-between">
+                
+                <!-- Pertanyaan -->
+                <div class="bg-teal-50 rounded-2xl p-2.5 md:p-3.5 border-2 border-teal-200 text-center shadow-inner flex items-center justify-center space-x-3 shrink-0">
+                    <span id="question-icon" class="text-2xl md:text-3xl"></span>
+                    <h2 id="question-text" class="text-sm md:text-lg font-bold text-gray-800">
+                        Loading Soal Mei Hua 4...
+                    </h2>
+                </div>
+
+                <!-- Pilihan Jawaban (6 Pilihan A-F Tanpa Pinyin dengan Font SimSun) -->
+                <div id="options-grid" class="grid grid-cols-3 gap-2 md:gap-3 my-auto">
+                    <!-- Tombol dibuat secara dinamis melalui JS -->
+                </div>
+
+                <!-- Kotak Umpan Balik / Feedback & Tombol Lanjut -->
+                <div class="flex items-center justify-between gap-3 h-14 shrink-0">
+                    <div id="feedback-box" class="hidden flex-grow p-2.5 rounded-2xl border-2 animate-pop h-full flex items-center justify-between">
+                        <div id="feedback-status" class="font-bold text-xs md:text-sm flex items-center mr-2"></div>
+                        <p id="feedback-text" class="text-gray-700 text-[11px] md:text-xs font-medium line-clamp-2"></p>
+                    </div>
+
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-bubble text-base md:text-lg py-1.5 px-5 rounded-2xl shadow-md btn-bounce transition-all duration-200 whitespace-nowrap h-full flex items-center justify-center space-x-2 shrink-0">
+                        <span>Lanjut</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Layar Timeout / Waktu Habis -->
+            <div id="timeout-container" class="hidden text-center animate-pop my-auto">
+                <div class="text-6xl mb-2 animate-bounce">⏰💥</div>
+                <h2 class="text-3xl font-bubble text-red-600 mb-2">WAKTU HABIS!</h2>
+                <p class="text-gray-600 text-sm mb-4 max-w-md mx-auto">Waktu 10 detik pengerjaan telah habis! Seluruh kuis di-reset dan kamu harus memulai ulang dari soal pertama.</p>
+                
+                <button onclick="restartQuiz()" class="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bubble text-lg py-2.5 px-8 rounded-2xl shadow-lg btn-bounce transition-all duration-200">
+                    <i class="fa-solid fa-rotate-right mr-2"></i>Ulangi Kuis Dari Awal
+                </button>
+            </div>
+
+            <!-- Layar Informasi Sebelum Remedial/Ulang -->
+            <div id="remedial-intro-container" class="hidden text-center animate-pop my-auto">
+                <div class="text-5xl mb-2">💪</div>
+                <h2 class="text-2xl font-bubble text-amber-600 mb-1">Mari Ulangi Soal yang Belum Tepat!</h2>
+                <p class="text-gray-600 text-sm mb-4">Kamu memiliki <span id="remedial-count" class="font-bold text-red-500">0</span> soal yang perlu dilatih kembali. Ayo coba lagi!</p>
+                
+                <button onclick="startRemedialSession()" class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white font-bubble text-lg py-2.5 px-8 rounded-2xl shadow-lg btn-bounce transition-all duration-200">
+                    <i class="fa-solid fa-play mr-2"></i>Mulai Remedial
+                </button>
+            </div>
+
+            <!-- Layar Hasil Akhir -->
+            <div id="result-container" class="hidden text-center animate-pop my-auto">
+                <div class="text-5xl mb-2">🏆</div>
+                <h2 class="text-2xl font-bubble text-gray-800 mb-1">Luar Biasa! Kuis Selesai!</h2>
+                <p class="text-gray-600 text-xs md:text-sm mb-3">Kamu berhasil menyelesaikan kuis Mei Hua 4 (Unit 1 - 4)!</p>
+                
+                <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-3.5 max-w-xs mx-auto mb-4 shadow-sm">
+                    <p class="text-gray-500 font-bold text-xs">TOTAL SKOR SESI UTAMA</p>
+                    <div id="final-score" class="text-4xl font-bubble text-emerald-600">0</div>
+                    <p id="final-message" class="text-xs font-semibold text-gray-700 mt-1"></p>
+                </div>
+
+                <button onclick="restartQuiz()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bubble text-base md:text-lg py-2 px-6 rounded-2xl shadow-lg btn-bounce transition-all duration-200">
+                    <i class="fa-solid fa-rotate-right mr-2"></i>Main dari Awal
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-gray-50 px-6 py-1.5 border-t text-center text-[10px] md:text-xs text-gray-400 shrink-0">
+            Mandarin SD Kelas 4 • Buku Mei Hua 4 (Unit 1, 2, 3, & 4)
+        </div>
+    </div>
+
+    <script>
+        // Mematikan shortcut keyboard Inspect Element & Copy
+        document.addEventListener('keydown', function(e) {
+            if (
+                e.ctrlKey && (e.key === 'c' || e.key === 'u' || e.key === 'i' || e.key === 'j' || e.key === 'a' || e.key === 's') ||
+                e.key === 'F12'
+            ) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Synthesizer Suara (Web Audio API)
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.15, now + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.15);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.08);
+                    osc.stop(now + idx * 0.08 + 0.15);
+                });
+            } else if (type === 'wrong') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(280, now);
+                osc.frequency.exponentialRampToValueAtTime(110, now + 0.35);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            } else if (type === 'tick') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'alarm') {
+                // Suara Alarm Saat Waktu Habis
+                for (let i = 0; i < 3; i++) {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(900, now + i * 0.18);
+                    osc.frequency.setValueAtTime(400, now + i * 0.18 + 0.09);
+                    gain.gain.setValueAtTime(0.25, now + i * 0.18);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.18 + 0.15);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + i * 0.18);
+                    osc.stop(now + i * 0.18 + 0.15);
+                }
+            }
+        }
+
+        // Database Kosakata Lengkap Buku Mei Hua 4 (Unit 1 - 4)
+        const rawQuestionsData = [
+            // --- UNIT 1: 丽丽想买新衣服 (Membeli Pakaian Baru) ---
+            {
+                icon: "🛍️",
+                question: "Mei Hua 4 Unit 1: Bahasa Mandarin untuk kata kerja 'Membeli' (Buy) adalah...",
+                options: [
+                    { hanzi: "买", isCorrect: true },
+                    { hanzi: "试", isCorrect: false },
+                    { hanzi: "想", isCorrect: false },
+                    { hanzi: "教", isCorrect: false },
+                    { hanzi: "找", isCorrect: false },
+                    { hanzi: "开", isCorrect: false }
+                ],
+                explanation: "<b>买 (mǎi)</b> artinya membeli. Sedangkan <b>试 (shì)</b> artinya mencobanya."
+            },
+            {
+                icon: "👖",
+                question: "Mei Hua 4 Unit 1: Lili hendak membeli 'Celana'. Apakah karakter Hanzi untuk celana?",
+                options: [
+                    { hanzi: "裤子", isCorrect: true },
+                    { hanzi: "裙子", isCorrect: false },
+                    { hanzi: "鞋", isCorrect: false },
+                    { hanzi: "东西", isCorrect: false },
+                    { hanzi: "足球", isCorrect: false },
+                    { hanzi: "电视", isCorrect: false }
+                ],
+                explanation: "<b>裤子 (kùzi)</b> artinya celana."
+            },
+            {
+                icon: "👗",
+                question: "Mei Hua 4 Unit 1: Ibu ingin membelikan Lili sebuah 'Rok'. Karakter Hanzi untuk rok adalah...",
+                options: [
+                    { hanzi: "裙子", isCorrect: true },
+                    { hanzi: "裤子", isCorrect: false },
+                    { hanzi: "鞋", isCorrect: false },
+                    { hanzi: "电影", isCorrect: false },
+                    { hanzi: "风", isCorrect: false },
+                    { hanzi: "课", isCorrect: false }
+                ],
+                explanation: "<b>裙子 (qúnzi)</b> artinya rok."
+            },
+            {
+                icon: "👟",
+                question: "Mei Hua 4 Unit 1: Kata 'Sepatu' dalam bahasa Mandarin adalah...",
+                options: [
+                    { hanzi: "鞋", isCorrect: true },
+                    { hanzi: "双", isCorrect: false },
+                    { hanzi: "裤子", isCorrect: false },
+                    { hanzi: "裙子", isCorrect: false },
+                    { hanzi: "件", isCorrect: false },
+                    { hanzi: "懂", isCorrect: false }
+                ],
+                explanation: "<b>鞋 (xié)</b> artinya sepatu. Satuannya adalah <b>双 (shuāng)</b> (pasang)."
+            },
+            {
+                icon: "✨",
+                question: "Mei Hua 4 Unit 1: Gaun ini sangat 'Cantik / Indah'. Apakah Hanzinya?",
+                options: [
+                    { hanzi: "漂亮", isCorrect: true },
+                    { hanzi: "好看", isCorrect: false },
+                    { hanzi: "合适", isCorrect: false },
+                    { hanzi: "着急", isCorrect: false },
+                    { hanzi: "大声", isCorrect: false },
+                    { hanzi: "马上", isCorrect: false }
+                ],
+                explanation: "<b>漂亮 (piàoliang)</b> artinya cantik atau indah."
+            },
+            {
+                icon: "👌",
+                question: "Mei Hua 4 Unit 1: Ukuran baju ini pas dan 'Cocok/Sesuai'. Bahasa Mandarinnya adalah...",
+                options: [
+                    { hanzi: "合适", isCorrect: true },
+                    { hanzi: "怎么样", isCorrect: false },
+                    { hanzi: "好看", isCorrect: false },
+                    { hanzi: "难", isCorrect: false },
+                    { hanzi: "忙", isCorrect: false },
+                    { hanzi: "生病", isCorrect: false }
+                ],
+                explanation: "<b>合适 (héshì)</b> artinya cocok, pas, atau sesuai."
+            },
+
+            // --- UNIT 2: 我能教你 (Saya Bisa Mengajarimu) ---
+            {
+                icon: "👨‍🏫",
+                question: "Mei Hua 4 Unit 2: Kata kerja 'Mengajar' dalam Mandarin adalah...",
+                options: [
+                    { hanzi: "教", isCorrect: true },
+                    { hanzi: "懂", isCorrect: false },
+                    { hanzi: "想", isCorrect: false },
+                    { hanzi: "帮助", isCorrect: false },
+                    { hanzi: "找", isCorrect: false },
+                    { hanzi: "试", isCorrect: false }
+                ],
+                explanation: "<b>教 (jiāo)</b> artinya mengajar."
+            },
+            {
+                icon: "💡",
+                question: "Mei Hua 4 Unit 2: 'Saya mengerti / paham'. Kata 'Paham/Mengerti' adalah...",
+                options: [
+                    { hanzi: "懂", isCorrect: true },
+                    { hanzi: "难", isCorrect: false },
+                    { hanzi: "忙", isCorrect: false },
+                    { hanzi: "教", isCorrect: false },
+                    { hanzi: "丢", isCorrect: false },
+                    { hanzi: "着急", isCorrect: false }
+                ],
+                explanation: "<b>懂 (dǒng)</b> artinya mengerti atau paham."
+            },
+            {
+                icon: "⏰",
+                question: "Mei Hua 4 Unit 2: 'Sekarang jam 8 pagi'. Kata 'Sekarang' dalam Mandarin adalah...",
+                options: [
+                    { hanzi: "现在", isCorrect: true },
+                    { hanzi: "马上", isCorrect: false },
+                    { hanzi: "外面", isCorrect: false },
+                    { hanzi: "但是", isCorrect: false },
+                    { hanzi: "着急", isCorrect: false },
+                    { hanzi: "怎么", isCorrect: false }
+                ],
+                explanation: "<b>现在 (xiànzài)</b> artinya sekarang."
+            },
+            {
+                icon: "🚀",
+                question: "Mei Hua 4 Unit 2: Dokter berkata harus 'Segera / Segera Mungkin' minum obat...",
+                options: [
+                    { hanzi: "马上", isCorrect: true },
+                    { hanzi: "现在", isCorrect: false },
+                    { hanzi: "但是", isCorrect: false },
+                    { hanzi: "不要", isCorrect: false },
+                    { hanzi: "别", isCorrect: false },
+                    { hanzi: "合适", isCorrect: false }
+                ],
+                explanation: "<b>马上 (mǎshàng)</b> artinya segera atau langsung."
+            },
+            {
+                icon: "🤝",
+                question: "Mei Hua 4 Unit 2: Kita harus saling 'Membantu / Menolong' sesama teman...",
+                options: [
+                    { hanzi: "帮助", isCorrect: true },
+                    { hanzi: "教", isCorrect: false },
+                    { hanzi: "试", isCorrect: false },
+                    { hanzi: "找", isCorrect: false },
+                    { hanzi: "买", isCorrect: false },
+                    { hanzi: "开", isCorrect: false }
+                ],
+                explanation: "<b>帮助 (bāngzhù)</b> artinya membantu atau menolong."
+            },
+            {
+                icon: "🤒",
+                question: "Mei Hua 4 Unit 2: Hari ini tidak masuk sekolah karena 'Sakit'...",
+                options: [
+                    { hanzi: "生病", isCorrect: true },
+                    { hanzi: "感冒", isCorrect: false },
+                    { hanzi: "难", isCorrect: false },
+                    { hanzi: "忙", isCorrect: false },
+                    { hanzi: "着急", isCorrect: false },
+                    { hanzi: "丢", isCorrect: false }
+                ],
+                explanation: "<b>生病 (shēngbìng)</b> artinya jatuh sakit."
+            },
+
+            // --- UNIT 3: 弟弟在看电视 (Adik Sedang Menonton TV) ---
+            {
+                icon: "⚽",
+                question: "Mei Hua 4 Unit 3: Olahraga 'Sepak Bola' dalam Mandarin adalah...",
+                options: [
+                    { hanzi: "足球", isCorrect: true },
+                    { hanzi: "踢足球", isCorrect: false },
+                    { hanzi: "电影", isCorrect: false },
+                    { hanzi: "电视", isCorrect: false },
+                    { hanzi: "东西", isCorrect: false },
+                    { hanzi: "鞋", isCorrect: false }
+                ],
+                explanation: "<b>足球 (zúqiú)</b> artinya bola kaki / sepak bola."
+            },
+            {
+                icon: "👟⚽",
+                question: "Mei Hua 4 Unit 3: Kata kerja untuk 'Bermain / Menendang Sepak Bola' adalah...",
+                options: [
+                    { hanzi: "踢足球", isCorrect: true },
+                    { hanzi: "看电视", isCorrect: false },
+                    { hanzi: "看电影", isCorrect: false },
+                    { hanzi: "刮风", isCorrect: false },
+                    { hanzi: "出去", isCorrect: false },
+                    { hanzi: "帮助", isCorrect: false }
+                ],
+                explanation: "<b>踢足球 (tī zúqiú)</b> artinya bermain / menendang sepak bola."
+            },
+            {
+                icon: "📺",
+                question: "Mei Hua 4 Unit 3: 'Televisi / TV' dalam bahasa Mandarin adalah...",
+                options: [
+                    { hanzi: "电视", isCorrect: true },
+                    { hanzi: "电影", isCorrect: false },
+                    { hanzi: "足球", isCorrect: false },
+                    { hanzi: "东西", isCorrect: false },
+                    { hanzi: "课", isCorrect: false },
+                    { hanzi: "双", isCorrect: false }
+                ],
+                explanation: "<b>电视 (diànshì)</b> artinya televisi."
+            },
+            {
+                icon: "🎬",
+                question: "Mei Hua 4 Unit 3: Pergi ke bioskop untuk menonton 'Film / Bioskop'...",
+                options: [
+                    { hanzi: "电影", isCorrect: true },
+                    { hanzi: "电视", isCorrect: false },
+                    { hanzi: "足球", isCorrect: false },
+                    { hanzi: "东西", isCorrect: false },
+                    { hanzi: "风", isCorrect: false },
+                    { hanzi: "裙子", isCorrect: false }
+                ],
+                explanation: "<b>电影 (diànyǐng)</b> artinya film."
+            },
+            {
+                icon: "😷",
+                question: "Mei Hua 4 Unit 3: Badan merasa dingin dan bersin karena 'Flu / Masuk Angin'...",
+                options: [
+                    { hanzi: "感冒", isCorrect: true },
+                    { hanzi: "生病", isCorrect: false },
+                    { hanzi: "着急", isCorrect: false },
+                    { hanzi: "难", isCorrect: false },
+                    { hanzi: "忙", isCorrect: false },
+                    { hanzi: "丢", isCorrect: false }
+                ],
+                explanation: "<b>感冒 (gǎnmào)</b> artinya flu atau masuk angin."
+            },
+            {
+                icon: "🔄",
+                question: "Mei Hua 4 Unit 3: Kata penghubung yang berarti 'Tetapi / Namun' adalah...",
+                options: [
+                    { hanzi: "但是", isCorrect: true },
+                    { hanzi: "把", isCorrect: false },
+                    { hanzi: "现在", isCorrect: false },
+                    { hanzi: "马上", isCorrect: false },
+                    { hanzi: "不要", isCorrect: false },
+                    { hanzi: "怎么样", isCorrect: false }
+                ],
+                explanation: "<b>但是 (dànshì)</b> artinya tetapi atau namun."
+            },
+
+            // --- UNIT 4: 外面在刮风呢 (Di Luar Sedang Berangin) ---
+            {
+                icon: "🏡",
+                question: "Mei Hua 4 Unit 4: Lawan kata dari 'Di Dalam' (里面) adalah 'Di Luar', yaitu...",
+                options: [
+                    { hanzi: "外面", isCorrect: true },
+                    { hanzi: "出去", isCorrect: false },
+                    { hanzi: "现在", isCorrect: false },
+                    { hanzi: "马上", isCorrect: false },
+                    { hanzi: "合适", isCorrect: false },
+                    { hanzi: "漂亮", isCorrect: false }
+                ],
+                explanation: "<b>外面 (wàimian)</b> artinya di luar."
+            },
+            {
+                icon: "💨",
+                question: "Mei Hua 4 Unit 4: Udara dingin karena 'Angin Bertiup / Berangin'...",
+                options: [
+                    { hanzi: "刮风", isCorrect: true },
+                    { hanzi: "风", isCorrect: false },
+                    { hanzi: "大声", isCorrect: false },
+                    { hanzi: "出去", isCorrect: false },
+                    { hanzi: "生病", isCorrect: false },
+                    { hanzi: "感冒", isCorrect: false }
+                ],
+                explanation: "<b>刮风 (guā fēng)</b> artinya angin bertiup / berangin."
+            },
+            {
+                icon: "🚫",
+                question: "Mei Hua 4 Unit 4: Kata larangan yang berarti 'Jangan!' adalah...",
+                options: [
+                    { hanzi: "别", isCorrect: true },
+                    { hanzi: "不要", isCorrect: false },
+                    { hanzi: "但是", isCorrect: false },
+                    { hanzi: "把", isCorrect: false },
+                    { hanzi: "还", isCorrect: false },
+                    { hanzi: "太", isCorrect: false }
+                ],
+                explanation: "<b>别 (bié)</b> atau <b>不要 (búyào)</b> artinya jangan."
+            },
+            {
+                icon: "📢",
+                question: "Mei Hua 4 Unit 4: 'Jangan berbicara dengan Suara Keras/Nyaring!'...",
+                options: [
+                    { hanzi: "大声", isCorrect: true },
+                    { hanzi: "着急", isCorrect: false },
+                    { hanzi: "漂亮", isCorrect: false },
+                    { hanzi: "合适", isCorrect: false },
+                    { hanzi: "好看", isCorrect: false },
+                    { hanzi: "难", isCorrect: false }
+                ],
+                explanation: "<b>大声 (dàshēng)</b> artinya suara keras / bersuara nyaring."
+            },
+
+            {
+                icon: "📦",
+                question: "Mei Hua 4 Unit 4: Ibu membeli banyak 'Barang / Benda' di toko...",
+                options: [
+                    { hanzi: "东西", isCorrect: true },
+                    { hanzi: "衣服", isCorrect: false },
+                    { hanzi: "鞋", isCorrect: false },
+                    { hanzi: "裤子", isCorrect: false },
+                    { hanzi: "裙子", isCorrect: false },
+                    { hanzi: "足球", isCorrect: false }
+                ],
+                explanation: "<b>东西 (dōngxi)</b> artinya barang atau benda."
+            },
+            {
+                icon: "🔍",
+                question: "Mei Hua 4 Unit 4: Penghapusku hilang, saya sedang 'Mencari'nya...",
+                options: [
+                    { hanzi: "找", isCorrect: true },
+                    { hanzi: "丢", isCorrect: false },
+                    { hanzi: "买", isCorrect: false },
+                    { hanzi: "试", isCorrect: false },
+                    { hanzi: "教", isCorrect: false },
+                    { hanzi: "开", isCorrect: false }
+                ],
+                explanation: "<b>找 (zhǎo)</b> artinya mencari. Sedangkan <b>丢 (diū)</b> artinya hilang."
+            },
+            {
+                icon: "😰",
+                question: "Mei Hua 4 Unit 4: Pensilnya hilang sehingga dia merasa sangat 'Cemas / Gelisah'...",
+                options: [
+                    { hanzi: "着急", isCorrect: true },
+                    { hanzi: "大声", isCorrect: false },
+                    { hanzi: "合适", isCorrect: false },
+                    { hanzi: "生病", isCorrect: false },
+                    { hanzi: "感冒", isCorrect: false },
+                    { hanzi: "难", isCorrect: false }
+                ],
+                explanation: "<b>着急 (zháojí)</b> artinya cemas, gelisah, atau terburu-buru."
+            }
+        ];
+
+        // State Kuis & Timer
+        let currentQueue = [];
+        let wrongQuestionsQueue = [];
+        let isRemedialMode = false;
+
+        let currentIndex = 0;
+        let mainScore = 0;
+        let answered = false;
+
+        // Timer State
+        const QUESTION_TIME_LIMIT = 10; // Batas Waktu 10 Detik
+        let timeLeft = QUESTION_TIME_LIMIT;
+        let timerInterval = null;
+
+        const modeSubtitleEl = document.getElementById('mode-subtitle');
+        const questionNumberEl = document.getElementById('question-number');
+        const totalQuestionsEl = document.getElementById('total-questions');
+        const scoreDisplayEl = document.getElementById('score-display');
+        const wrongCountBadgeEl = document.getElementById('wrong-count-badge');
+        const wrongCountEl = document.getElementById('wrong-count');
+        const questionIconEl = document.getElementById('question-icon');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsGridEl = document.getElementById('options-grid');
+        const feedbackBoxEl = document.getElementById('feedback-box');
+        const feedbackStatusEl = document.getElementById('feedback-status');
+        const feedbackTextEl = document.getElementById('feedback-text');
+        const nextBtnEl = document.getElementById('next-btn');
+        
+        const timerTextEl = document.getElementById('timer-text');
+        const timerBarEl = document.getElementById('timer-bar');
+        const timerBadgeEl = document.getElementById('timer-badge');
+        const mainContainerEl = document.getElementById('main-container');
+
+        const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+        // Helper Fungsi Acak Array (Fisher-Yates Shuffle)
+        function shuffleArray(array) {
+            const arr = JSON.parse(JSON.stringify(array));
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function initQuizState() {
+            stopTimer();
+            const shuffledQuestions = shuffleArray(rawQuestionsData);
+            currentQueue = shuffledQuestions.map(q => {
+                q.options = shuffleArray(q.options);
+                return q;
+            });
+
+            wrongQuestionsQueue = [];
+            isRemedialMode = false;
+            currentIndex = 0;
+            mainScore = 0;
+            
+            scoreDisplayEl.textContent = mainScore;
+            modeSubtitleEl.textContent = "Sesi Utama • Latihan Kosakata Mandarin SD Kelas 4";
+            wrongCountBadgeEl.classList.add('hidden');
+            wrongCountEl.textContent = '0';
+
+            document.getElementById('timeout-container').classList.add('hidden');
+            document.getElementById('remedial-intro-container').classList.add('hidden');
+            document.getElementById('result-container').classList.add('hidden');
+            document.getElementById('quiz-header').classList.remove('hidden');
+            document.getElementById('question-container').classList.remove('hidden');
+        }
+
+        function startTimer() {
+            stopTimer();
+            timeLeft = QUESTION_TIME_LIMIT;
+            updateTimerUI();
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerUI();
+
+                if (timeLeft <= 3 && timeLeft > 0) {
+                    playSound('tick');
+                }
+
+                if (timeLeft <= 0) {
+                    stopTimer();
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateTimerUI() {
+            timerTextEl.textContent = timeLeft;
+            const percentage = (timeLeft / QUESTION_TIME_LIMIT) * 100;
+            timerBarEl.style.width = `${percentage}%`;
+
+            if (timeLeft <= 3) {
+                timerBadgeEl.classList.add('bg-red-100', 'text-red-700', 'border-red-500');
+                timerBarEl.classList.replace('bg-emerald-500', 'bg-red-600');
+                mainContainerEl.classList.add('timer-warning');
+            } else {
+                timerBadgeEl.classList.remove('bg-red-100', 'text-red-700', 'border-red-500');
+                timerBarEl.classList.replace('bg-red-600', 'bg-emerald-500');
+                mainContainerEl.classList.remove('timer-warning');
+            }
+        }
+
+        function handleTimeout() {
+            playSound('alarm');
+            document.getElementById('question-container').classList.add('hidden');
+            document.getElementById('quiz-header').classList.add('hidden');
+            document.getElementById('timeout-container').classList.remove('hidden');
+        }
+
+        function loadQuestion() {
+            answered = false;
+            const currentQ = currentQueue[currentIndex];
+
+            questionNumberEl.textContent = currentIndex + 1;
+            totalQuestionsEl.textContent = currentQueue.length;
+            
+            questionIconEl.textContent = currentQ.icon;
+            questionTextEl.textContent = currentQ.question;
+            
+            feedbackBoxEl.classList.add('hidden');
+            nextBtnEl.classList.add('hidden');
+            optionsGridEl.innerHTML = '';
+
+            currentQ.options.forEach((opt, idx) => {
+                const button = document.createElement('button');
+                button.className = `btn-bounce bg-white border-2 border-emerald-200 hover:border-emerald-400 text-gray-800 font-semibold p-2.5 md:p-3 rounded-xl shadow-sm hover:shadow-md flex flex-col items-center justify-center transition-all duration-200 w-full group relative`;
+                button.onclick = () => selectAnswer(idx);
+
+                button.innerHTML = `
+                    <span class="absolute top-1 left-2 bg-emerald-100 group-hover:bg-emerald-200 text-emerald-800 text-[10px] md:text-xs px-1.5 py-0.5 rounded-full font-bold">
+                        ${optionLabels[idx]}
+                    </span>
+                    <span class="font-simsun text-2xl md:text-3xl font-bold text-emerald-800 py-1">${opt.hanzi}</span>
+                `;
+                optionsGridEl.appendChild(button);
+            });
+
+            // Jalankan Timer
+            startTimer();
+        }
+
+        function selectAnswer(selectedIndex) {
+            if (answered) return;
+            answered = true;
+            stopTimer(); // Hentikan Waktu saat jawaban dipilih
+
+            const currentQ = currentQueue[currentIndex];
+            const buttons = optionsGridEl.querySelectorAll('button');
+            const selectedOpt = currentQ.options[selectedIndex];
+
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (selectedOpt.isCorrect) {
+                playSound('correct');
+                if (!isRemedialMode) {
+                    mainScore += 10;
+                    scoreDisplayEl.textContent = mainScore;
+                }
+
+                buttons[selectedIndex].classList.remove('border-emerald-200', 'bg-white');
+                buttons[selectedIndex].classList.add('bg-emerald-100', 'border-emerald-500', 'ring-2', 'ring-emerald-300');
+
+                feedbackBoxEl.className = "flex-grow p-2.5 rounded-2xl border-2 animate-pop bg-emerald-50 border-emerald-300 flex items-center justify-between";
+                feedbackStatusEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 mr-1.5 text-lg"></i> <span class="text-emerald-700 whitespace-nowrap">Benar! 🎉</span>`;
+            } else {
+                playSound('wrong');
+                
+                if (!wrongQuestionsQueue.includes(currentQ)) {
+                    wrongQuestionsQueue.push(currentQ);
+                    wrongCountEl.textContent = wrongQuestionsQueue.length;
+                    wrongCountBadgeEl.classList.remove('hidden');
+                }
+
+                buttons[selectedIndex].classList.remove('border-emerald-200', 'bg-white');
+                buttons[selectedIndex].classList.add('bg-red-100', 'border-red-400');
+
+                currentQ.options.forEach((opt, idx) => {
+                    if (opt.isCorrect) {
+                        buttons[idx].classList.remove('border-emerald-200', 'bg-white');
+                        buttons[idx].classList.add('bg-emerald-100', 'border-emerald-500');
+                    }
+                });
+
+                feedbackBoxEl.className = "flex-grow p-2.5 rounded-2xl border-2 animate-pop bg-red-50 border-red-300 flex items-center justify-between";
+                feedbackStatusEl.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-500 mr-1.5 text-lg"></i> <span class="text-red-700 whitespace-nowrap">Kurang Tepat! 💪</span>`;
+            }
+
+            feedbackTextEl.innerHTML = currentQ.explanation;
+            feedbackBoxEl.classList.remove('hidden');
+            nextBtnEl.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < currentQueue.length) {
+                loadQuestion();
+            } else {
+                if (wrongQuestionsQueue.length > 0) {
+                    showRemedialIntro();
+                } else {
+                    showResults();
+                }
+            }
+        }
+
+        function showRemedialIntro() {
+            stopTimer();
+            document.getElementById('question-container').classList.add('hidden');
+            document.getElementById('remedial-count').textContent = wrongQuestionsQueue.length;
+            document.getElementById('remedial-intro-container').classList.remove('hidden');
+        }
+
+        function startRemedialSession() {
+            isRemedialMode = true;
+            modeSubtitleEl.textContent = "Sesi Remedial • Mengulang Soal Mei Hua 4";
+            
+            currentQueue = wrongQuestionsQueue.map(q => {
+                q.options = shuffleArray(q.options);
+                return q;
+            });
+            currentQueue = shuffleArray(currentQueue);
+
+            wrongQuestionsQueue = [];
+            wrongCountEl.textContent = '0';
+            wrongCountBadgeEl.classList.add('hidden');
+
+            currentIndex = 0;
+            document.getElementById('remedial-intro-container').classList.add('hidden');
+            document.getElementById('question-container').classList.remove('hidden');
+            
+            loadQuestion();
+        }
+
+        function showResults() {
+            stopTimer();
+            document.getElementById('question-container').classList.add('hidden');
+            document.getElementById('quiz-header').classList.add('hidden');
+            document.getElementById('result-container').classList.remove('hidden');
+
+            const finalScoreEl = document.getElementById('final-score');
+            const finalMessageEl = document.getElementById('final-message');
+            finalScoreEl.textContent = mainScore;
+
+            if (mainScore >= 200) {
+                finalMessageEl.textContent = "Hebat sekali! 🌟 Kamu sudah sangat menguasai kosakata Mei Hua 4 (Unit 1 - 4)!";
+            } else if (mainScore >= 120) {
+                finalMessageEl.textContent = "Bagus! 👍 Kamu menguasai sebagian besar materi Mei Hua 4.";
+            } else {
+                finalMessageEl.textContent = "Tetap semangat! 💪 Kamu sudah berhasil mengulang semua soal hingga tuntas!";
+            }
+        }
+
+        function restartQuiz() {
+            initQuizState();
+            loadQuestion();
+        }
+
+        // Jalankan Kuis Pertama Kali
+        initQuizState();
+        loadQuestion();
+    </script>
+</body>
+</html>
